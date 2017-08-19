@@ -12,17 +12,25 @@ import org.ajoberstar.grgit.*
  * Created by drapp on 7/16/14.
  */
 class GitRepoPlugin  implements Plugin<Project> {
+
+    private def provider(Project project, String host) {
+        { String org, String repo, String branch = "master", String type = "releases", def closure = null ->
+            String gitUrl = providerCloneUrl(host, org, repo)
+            def orgDir = repositoryDir(project, org)
+            addLocalRepo(project, ensureLocalRepo(project, orgDir, repo, gitUrl, branch), type)
+        }
+    }
+
     void apply(Project project) {
 
         project.extensions.create("gitPublishConfig", GitPublishConfig)
 
         // allow declaring special repositories
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'github', String, String, String, String, Object)) {
-            project.repositories.metaClass.github = { String org, String repo, String branch = "master", String type = "releases", def closure = null ->
-                String gitUrl = githubCloneUrl(org, repo)
-                def orgDir = repositoryDir(project, org)
-                addLocalRepo(project, ensureLocalRepo(project, orgDir, repo, gitUrl, branch), type)
-            }
+            project.repositories.metaClass.github = provider(project, 'github.com')
+        }
+        if (!project.repositories.metaClass.respondsTo(project.repositories, 'bitbucket', String, String, String, String, Object)) {
+            project.repositories.metaClass.bitbucket = provider(project, 'bitbucket.org')
         }
         if (!project.repositories.metaClass.respondsTo(project.repositories, 'git', String, String, String, String, Object)) {
             project.repositories.metaClass.git = { String gitUrl, String name, String branch = "master", String type = "releases", def closure = null ->
@@ -80,8 +88,9 @@ class GitRepoPlugin  implements Plugin<Project> {
             return project.file("${System.properties['user.home']}/.gitRepos/$name")
         }
     }
-    private static String githubCloneUrl(String org, String repo) {
-        return "git@github.com:$org/${repo}.git"
+  
+    private static String providerCloneUrl(String provider, String org, String repo) {
+        return "git@$provider:$org/${repo}.git"
     }
 
     private static String gitCloneUrl(Project project) {
