@@ -1,3 +1,5 @@
+[![](https://jitpack.io/v/atsushi-ageet/gradle-git-repo-plugin.svg)](https://jitpack.io/#atsushi-ageet/gradle-git-repo-plugin)
+
 # The Gradle Git Repo Plugin
 
 This plugin allows you to add a git repository as a maven repo, even if the git
@@ -25,10 +27,10 @@ This plugin needs to be added via the standard plugin mechanism with this builds
 
     buildscript {
         repositories {
-            mavenCentral()
+            maven { url 'https://jitpack.io' }
         }
         dependencies {
-            classpath group: 'com.layer', name: 'gradle-git-repo-plugin', version: '2.0.2'
+            classpath 'com.github.atsushi-ageet:gradle-git-repo-plugin:2.0.4'
         }
     }
 
